@@ -43,7 +43,3 @@ subprojects {
         options.compilerArgs += ['-Xlint:unchecked', '-Xlint:deprecation']
     }
 }
-
-wrapper {
-    gradleVersion = '7.4.2'
-}
