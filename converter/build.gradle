@@ -5,9 +5,6 @@ buildscript {
             url 'https://plugins.gradle.org/m2/'
         }
     }
-    dependencies {
-        classpath 'com.commercehub.gradle.plugin:gradle-avro-plugin:0.14.0'
-    }
 }
 
 plugins {
@@ -18,10 +15,9 @@ plugins {
     // https://github.com/melix/jmh-gradle-plugin#what-plugin-version-to-use
     id 'me.champeau.gradle.jmh' version '0.5.3'
     id 'pmd'
+    id "com.github.davidmc24.gradle.plugin.avro" version "1.8.0"
+    id 'idea'
 }
-
-apply plugin: 'com.commercehub.gradle.plugin.avro'
-apply plugin: 'idea'
 
 configurations {
     jmh
@@ -42,7 +38,7 @@ jmh {
 }
 
 dependencies {
-    implementation group: 'org.apache.avro', name: 'avro', version: '1.9.0'
+    implementation group: 'org.apache.avro', name: 'avro', version: '1.11.2'
 
     testImplementation group: 'org.spockframework', name: 'spock-core', version: versions.spock
     testImplementation group: 'org.codehaus.groovy', name: 'groovy-all', version: versions.groovy
