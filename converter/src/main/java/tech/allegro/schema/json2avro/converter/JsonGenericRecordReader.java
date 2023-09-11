@@ -185,30 +185,25 @@ public class JsonGenericRecordReader {
         Object result;
         LogicalType logicalType = schema.getLogicalType();
         switch (schema.getType()) {
-            case RECORD:
-                result = onValidType(value, Map.class, path, silently, map -> readRecord(map, schema, path));
-                break;
-            case ARRAY:
-                result = onValidType(value, List.class, path, silently, list -> readArray(field, schema, list, path));
-                break;
-            case MAP:
-                result = onValidType(value, Map.class, path, silently, map -> readMap(field, schema, map, path));
-                break;
-            case UNION:
-                result = readUnion(field, schema, value, path, enforceString);
-                break;
-            case INT:
+            case RECORD ->
+                    result = onValidType(value, Map.class, path, silently, map -> readRecord(map, schema, path));
+            case ARRAY ->
+                    result = onValidType(value, List.class, path, silently, list -> readArray(field, schema, list, path));
+            case MAP ->
+                    result = onValidType(value, Map.class, path, silently, map -> readMap(field, schema, map, path));
+            case UNION -> result = readUnion(field, schema, value, path, enforceString);
+            case INT -> {
                 // Only "date" logical type is expected here, because the Avro schema is converted from a Json schema,
                 // and this logical types corresponds to the Json "date" format.
                 if (logicalType != null && logicalType.equals(LogicalTypes.date())) {
                     result = onValidType(value, String.class, path, silently, DateTimeUtils::getEpochDay);
                 } else {
-                    result = value instanceof String valueString? // implicit cast to String
-                        onValidStringNumber(valueString, path, silently, Integer::parseInt) :
-                        onValidNumber(value, path, silently, Number::intValue);
+                    result = value instanceof String valueString ? // implicit cast to String
+                            onValidStringNumber(valueString, path, silently, Integer::parseInt) :
+                            onValidNumber(value, path, silently, Number::intValue);
                 }
-                break;
-            case LONG:
+            }
+            case LONG -> {
                 // Only "time-micros" and "timestamp-micros" logical types are expected here, because
                 // the Avro schema is converted from a Json schema, and the two logical types corresponds
                 // to the Json "time" and "date-time" formats.
@@ -218,41 +213,32 @@ public class JsonGenericRecordReader {
                     result = onValidType(value, String.class, path, silently, DateTimeUtils::getMicroSeconds);
                 } else {
                     result = value instanceof String stringValue ? // implicit cast to String
-                        onValidStringNumber(stringValue, path, silently, Long::parseLong) :
-                        onValidNumber(value, path, silently, Number::longValue);
+                            onValidStringNumber(stringValue, path, silently, Long::parseLong) :
+                            onValidNumber(value, path, silently, Number::longValue);
                 }
-                break;
-            case FLOAT:
-                result = value instanceof String stringValue ? // implicit cast to String
+            }
+            case FLOAT -> result = value instanceof String stringValue ? // implicit cast to String
                     onValidStringNumber(stringValue, path, silently, Float::parseFloat) :
                     onValidNumber(value, path, silently, Number::floatValue);
-                break;
-            case DOUBLE:
-                result = value instanceof String stringValue ? // implicit cast to String
+            case DOUBLE -> result = value instanceof String stringValue ? // implicit cast to String
                     onValidStringNumber(stringValue, path, silently, Double::parseDouble) :
                     onValidNumber(value, path, silently, Number::doubleValue);
-                break;
-            case BOOLEAN:
-                result = onValidType(value, Boolean.class, path, silently, bool -> bool);
-                break;
-            case ENUM:
-                result = onValidType(value, String.class, path, silently, string -> ensureEnum(schema, string, path));
-                break;
-            case STRING:
+            case BOOLEAN ->
+                    result = onValidType(value, Boolean.class, path, silently, bool -> bool);
+            case ENUM ->
+                    result = onValidType(value, String.class, path, silently, string -> ensureEnum(schema, string, path));
+            case STRING -> {
                 if (enforceString) {
                     result = value == null ? INCOMPATIBLE : AdditionalPropertyField.getValue(value);
                 } else {
                     result = onValidType(value, String.class, path, silently, string -> string);
                 }
-                break;
-            case BYTES:
-                result = onValidType(value, String.class, path, silently, this::bytesForString);
-                break;
-            case NULL:
-                result = value == null ? value : INCOMPATIBLE;
-                break;
-            default:
-                throw new AvroTypeException("Unsupported type: " + field.schema().getType());
+            }
+            case BYTES ->
+                    result = onValidType(value, String.class, path, silently, this::bytesForString);
+            case NULL -> result = value == null ? value : INCOMPATIBLE;
+            default -> throw new AvroTypeException("Unsupported type: " + field.schema()
+                                                                               .getType());
         }
 
         if (pushed) {

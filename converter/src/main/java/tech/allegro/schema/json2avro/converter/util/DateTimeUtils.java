@@ -45,7 +45,11 @@ public class DateTimeUtils {
                 LocalDateTime dt = LocalDateTime.parse(jsonDateTime, DATE_TIME_FORMATTER);
                 instant = dt.toInstant(ZoneOffset.UTC);
             } catch (DateTimeParseException ex) {
-                // no logging since it may generate too much noise
+                try {
+                    instant = Instant.parse(jsonDateTime);
+                } catch (DateTimeParseException lastEx) {
+                    // no logging since it may generate too much noise
+                }
             }
         }
         return instant == null ? null : instant.toEpochMilli() * 1000;
