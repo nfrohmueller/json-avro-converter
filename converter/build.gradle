@@ -13,10 +13,17 @@ plugins {
     // does not work with Java 10
     // id 'jacoco'
     // https://github.com/melix/jmh-gradle-plugin#what-plugin-version-to-use
-    id 'me.champeau.gradle.jmh' version '0.5.3'
+    id "me.champeau.jmh" version "0.7.1"
     id 'pmd'
     id "com.github.davidmc24.gradle.plugin.avro" version "1.8.0"
     id 'idea'
+    id 'maven-publish'
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://artifactory.rewe.cloud/artifactory/libs-release' }
+    maven { url 'https://artifactory.rewe.cloud/artifactory/libs-snapshot' }
 }
 
 configurations {
@@ -24,9 +31,9 @@ configurations {
 }
 
 jmh {
-    include = 'tech\\.allegro\\.schema\\.json2avro\\.converter\\..*'
+    includes = ['tech\\.allegro\\.schema\\.json2avro\\.converter\\..*']
     humanOutputFile = null
-    jmhVersion = '1.20'
+    jmhVersion = '1.37'
     iterations = 2
     timeOnIteration = '10s'
     fork = 1
@@ -34,17 +41,37 @@ jmh {
     warmup = '10s'
     failOnError = true
     threads = 1
-    duplicateClassesStrategy = 'warn'
+    duplicateClassesStrategy = DuplicatesStrategy.WARN
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'com.rewedigital.kafka'
+            artifactId = "${rootProject.name}-${project.name}"
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            credentials {
+                username = project.properties.artifactoryUser ?: ""
+                password = project.properties.artifactoryPassword ?: ""
+            }
+            name = 'artifactory'
+            url = "https://artifactory.rewe.cloud/artifactory/libs-${version.endsWith('SNAPSHOT') ? 'snapshot' : 'release'}-local"
+        }
+    }
 }
 
 dependencies {
-    implementation group: 'org.apache.avro', name: 'avro', version: '1.11.2'
+    implementation group: 'org.apache.avro', name: 'avro', version: versions.avro
 
     testImplementation group: 'org.spockframework', name: 'spock-core', version: versions.spock
     testImplementation group: 'org.codehaus.groovy', name: 'groovy-all', version: versions.groovy
 
-    jmh 'org.openjdk.jmh:jmh-core:1.20'
-    jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.20'
+    jmh 'org.openjdk.jmh:jmh-core:1.37'
+    jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
 
     implementation 'com.google.guava:guava:30.1.1-jre'
 

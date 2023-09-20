@@ -1,23 +1,23 @@
 plugins {
     id 'java'
-    id 'pl.allegro.tech.build.axion-release' version '1.10.2'
+//    id 'pl.allegro.tech.build.axion-release' version '1.10.2'
 }
 
-scmVersion {
-    tag {
-        prefix = 'json-avro-converter'
-    }
-    versionCreator 'versionWithBranch'
-
-    hooks {
-        pre 'fileUpdate', [files: ['README.md'], pattern: {v, p -> /'$v'/ }, replacement: {v, p -> "'$v'"}]
-        pre 'commit'
-    }
-}
+//scmVersion {
+//    tag {
+//        prefix = 'json-avro-converter'
+//    }
+//    versionCreator 'versionWithBranch'
+//
+//    hooks {
+//        pre 'fileUpdate', [files: ['README.md'], pattern: {v, p -> /'$v'/ }, replacement: {v, p -> "'$v'"}]
+//        pre 'commit'
+//    }
+//}
 
 allprojects {
     project.group = 'tech.allegro.schema.json2avro'
-    project.version = scmVersion.version
+//    project.version = scmVersion.version
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 }
@@ -26,7 +26,8 @@ subprojects {
 
     project.ext.versions = [
         spock: '2.1-groovy-3.0',
-        groovy: '3.0.9'
+        groovy: '3.0.9',
+            avro: '1.11.2'
     ]
 
     repositories {
